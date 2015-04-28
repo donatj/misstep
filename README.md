@@ -1,5 +1,5 @@
 # misstep
-Simple Plain Text MySQL Modeling Language
+Simple Plain Text MySQL Modeling Language - "Like Sass for SQL Modeling"
 
 The goal is to allow you to quickly mock up SQL Tables in an easy to read, familiar feeling syntax.
 

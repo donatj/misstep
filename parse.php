@@ -204,12 +204,12 @@ foreach( $foreignKeys['children'] as $name => $fks ) {
 	}
 }
 
-echo "SET foreign_key_checks = 0;\n";
+echo "SET FOREIGN_KEY_CHECKS = 0;\n\n";
 foreach( $tables as $table ) {
 	echo $table->toString();
 	echo "\n";
 }
-echo "SET foreign_key_checks = 1;\n";
+echo "SET FOREIGN_KEY_CHECKS = 1;\n";
 
 
 

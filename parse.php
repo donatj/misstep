@@ -28,6 +28,8 @@ for( $i = 0; $i < count($result); $i++ ) {
 	$body = $result[$i]['body'] . "\n";
 
 	$table = new Table($result[$i]['declaration']);
+	$table->setCharset('utf8');
+	$table->setCollation('utf8_general_ci');
 
 	if( trim($result[$i]['comment']) ) {
 		$table->setComment(parseComment($result[$i]['comment']));

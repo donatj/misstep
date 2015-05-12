@@ -37,7 +37,7 @@ for( $i = 0; $i < count($result); $i++ ) {
 
 	$bodyMatch = '/(?P<signal>[-?!])[ \t](?P<colName>\S+)
 		[ \t]+(?P<nullable>\*)?(?P<signed>-)?(?P<colType>[a-z]+)(?P<colLength>\d+)?(?P<colDecimal>,\d+)?
-		(?:=(?P<default>(?:\S+|\'.*\')))?
+		(?:(?P<hasDefault>=)(?:\'(?P<default1>(?:\'\'|[^\'])*)\'|(?P<default2>\S)))?
 		(?P<pk>[ \t]\*?pk)?
 		(?P<keys>(?:[ \t]+k\d+)*)
 		(?P<uniques>(?:[ \t]+u\d+)*)
@@ -130,8 +130,12 @@ for( $i = 0; $i < count($result); $i++ ) {
 			$col->setNullable(true);
 		}
 
-		if( $bodyResult[$j]['default'] ) {
-			$col->setDefault($bodyResult[$j]['default']);
+		if( $bodyResult[$j]['hasDefault'] ) {
+			if( $bodyResult[$j]['default2'] != '' ) {
+				$col->setDefault($bodyResult[$j]['default2']);
+			} else {
+				$col->setDefault(str_replace("''", "'", $bodyResult[$j]['default1']));
+			}
 		}
 
 		if( trim($bodyResult[$j]['comment']) ) {
@@ -212,7 +216,6 @@ foreach( $tables as $table ) {
 	echo "\n";
 }
 echo "SET FOREIGN_KEY_CHECKS = 1;\n";
-
 
 
 /**

@@ -232,6 +232,7 @@ try {
 	parse($jql);
 } catch(\donatj\Misstep\Exceptions\UserException $e) {
 	echo "Error: " . $e->getMessage() . "\n";
+	die(1);
 }
 
 

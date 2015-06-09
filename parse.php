@@ -200,7 +200,7 @@ function parse( $jql ) {
 // Link up foreign keys
 	foreach( $foreignKeys['children'] as $name => $fks ) {
 		if( !isset($foreignKeys['parents'][$name]) ) {
-			throw new \Exception("unknown foreign key: {$name}");
+			throw new \donatj\Misstep\Exceptions\StructureException("unknown foreign key: {$name}");
 		}
 
 		$remote = $foreignKeys['parents'][$name];

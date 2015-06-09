@@ -29,6 +29,9 @@ function parse( $jql ) {
 
 	preg_match_all($totalMatch, $jql, $result, PREG_SET_ORDER);
 
+	/**
+	 * @var $tables \donatj\MySqlSchema\Table[]
+	 */
 	$foreignKeys = [ 'parents' => [ ], 'children' => [ ] ];
 	$tables      = [ ];
 	for( $i = 0; $i < count($result); $i++ ) {

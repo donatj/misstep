@@ -231,7 +231,7 @@ function parse( $jql ) {
 try {
 	parse($jql);
 } catch(\donatj\Misstep\Exceptions\UserException $e) {
-	echo "Error: " . $e->getMessage() . "\n";
+	fwrite(STDERR, "Error: " . $e->getMessage() . "\n");
 	die(1);
 }
 

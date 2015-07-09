@@ -17,7 +17,7 @@ function parse( $jql ) {
 	$jql = preg_replace('%^//.*$%mx', '', $jql); //remove commented lines before parse
 	$jql .= "\n";
 
-	$totalMatch = '/\#\s(?P<declaration>.*)
+	$totalMatch = '/(?P<type>[#@])\s(?P<declaration>.*)
 		(?P<comment>\n(?::\s.*\n?)*)
 		(?P<body>
 		    (?:[-!?]\s.*\n
@@ -37,9 +37,10 @@ function parse( $jql ) {
 	for( $i = 0; $i < count($result); $i++ ) {
 		$body = $result[$i]['body'] . "\n";
 
-		$table = new Table($result[$i]['declaration']);
+		$table = new \donatj\Misstep\GenerationTable($result[$i]['declaration']);
 		$table->setCharset('utf8');
 		$table->setCollation('utf8_general_ci');
+		$table->setIsPseudo($result[$i]['type'] == '@');
 
 		if( trim($result[$i]['comment']) ) {
 			$table->setComment(parseComment($result[$i]['comment']));
@@ -222,8 +223,10 @@ function parse( $jql ) {
 
 	echo "SET FOREIGN_KEY_CHECKS = 0;\n\n";
 	foreach( $tables as $table ) {
-		echo $table->toString();
-		echo "\n";
+		if( !$table->isIsPseudo() ) {
+			echo $table->toString();
+			echo "\n";
+		}
 	}
 	echo "SET FOREIGN_KEY_CHECKS = 1;\n";
 }

@@ -229,6 +229,9 @@ function parse( $jql ) {
 }
 
 try {
+	if( trim($jql) == '' ) {
+		return '';
+	}
 	parse($jql);
 } catch(\donatj\Misstep\Exceptions\UserException $e) {
 	fwrite(STDERR, "Error: " . $e->getMessage() . "\n");

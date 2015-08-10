@@ -11,6 +11,8 @@ $flags        = new donatj\Flags();
 $drop         =& $flags->bool('drop', false, 'Include DROP TABLE?');
 $inputComment =& $flags->bool('input-comment', false, 'Include original input as a comment?');
 
+$columnFactory = new \donatj\Misstep\ColumnFactory();
+
 $flags->parse();
 
 // @todo make availible from mysql-schema
@@ -24,7 +26,7 @@ function escape( $input, $wrapChar = '`' ) {
  * @throws \donatj\Misstep\Exceptions\ParseException
  * @throws \donatj\Misstep\Exceptions\StructureException
  */
-function parse( $jql, $drop, $inputComment ) {
+function parse( $jql, \donatj\Misstep\ColumnFactory $columnFactory, $drop, $inputComment ) {
 	$jql = preg_replace('%^//.*$%mx', '', $jql); //remove commented lines before parse
 	$jql .= "\n";
 
@@ -78,7 +80,7 @@ function parse( $jql, $drop, $inputComment ) {
 
 			$colType = $bodyResult[$j]['colType'];
 
-			$col = ColumnFactory($colType, $colName);
+			$col = $columnFactory->make($colType, $colName);
 
 			if(
 				$bodyResult[$j]['colLength'] &&
@@ -198,76 +200,11 @@ function parse( $jql, $drop, $inputComment ) {
 	echo "SET FOREIGN_KEY_CHECKS = 1;\n";
 }
 
-/**
- * @param $colType
- * @param $colName
- * @return \donatj\MySqlSchema\Columns\Numeric\Integers\BigIntColumn|\donatj\MySqlSchema\Columns\Numeric\Integers\IntColumn|\donatj\MySqlSchema\Columns\Numeric\Integers\MediumIntColumn|\donatj\MySqlSchema\Columns\Numeric\Integers\SmallIntColumn|\donatj\MySqlSchema\Columns\Numeric\Integers\TinyIntColumn|null
- * @throws \donatj\Misstep\Exceptions\StructureException
- */
-function ColumnFactory( $colType, $colName ) {
-	$col = null;
-	switch( $colType ) {
-		case 'bool':
-			$col = new Columns\Numeric\Integers\TinyIntColumn($colName);
-			$col->setLength(1);
-			break;
-		case 'tinyint':
-			$col = new Columns\Numeric\Integers\TinyIntColumn($colName);
-			break;
-		case 'smallint':
-			$col = new Columns\Numeric\Integers\SmallIntColumn($colName);
-			break;
-		case 'int':
-			$col = new Columns\Numeric\Integers\IntColumn($colName);
-			break;
-		case 'mediumint':
-			$col = new Columns\Numeric\Integers\MediumIntColumn($colName);
-			break;
-		case 'bigint':
-			$col = new Columns\Numeric\Integers\BigIntColumn($colName);
-			break;
-
-		case 'tinytext':
-			$col = new Columns\String\Text\TinyTextColumn($colName);
-			break;
-		case 'text':
-			$col = new Columns\String\Text\TextColumn($colName);
-			break;
-		case 'mediumtext':
-			$col = new Columns\String\Text\MediumTextColumn($colName);
-			break;
-		case 'longtext':
-			$col = new Columns\String\Text\LongTextColumn($colName);
-			break;
-
-		case 'char':
-			$col = new Columns\String\Character\CharColumn($colName, 255);
-			break;
-		case 'varchar':
-			$col = new Columns\String\Character\VarcharColumn($colName, 255); //will get overriten further down
-			break;
-		
-		case 'timestamp':
-			$col = new Columns\Temporal\TimestampColumn($colName, 255);
-			break;
-		case 'year':
-			$col = new Columns\Temporal\YearColumn($colName, 4);
-			break;
-		case 'datetime':
-			$col = new Columns\Temporal\DateTimeColumn($colName);
-			break;
-		default:
-			throw new \donatj\Misstep\Exceptions\StructureException('unknown type: ' . $colType);
-	}
-
-	return $col;
-}
-
 try {
 	if( trim($jql) == '' ) {
 		return '';
 	}
-	parse($jql, $drop, $inputComment);
+	parse($jql, $columnFactory, $drop, $inputComment);
 } catch(\donatj\Misstep\Exceptions\UserException $e) {
 	fwrite(STDERR, "Error: " . $e->getMessage() . "\n");
 	die(1);

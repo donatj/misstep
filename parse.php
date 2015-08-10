@@ -28,6 +28,7 @@ function escape( $input, $wrapChar = '`' ) {
  */
 function parse( $jql, \donatj\Misstep\ColumnFactory $columnFactory, $drop, $inputComment ) {
 	$jql = preg_replace('%^//.*$%mx', '', $jql); //remove commented lines before parse
+	$jql = preg_replace('/[ \t]+$/m', '', $jql); //remove trailing whitespace from lines
 	$jql .= "\n";
 
 	$totalMatch = '/(?P<type>[#@])\s(?P<declaration>.*)

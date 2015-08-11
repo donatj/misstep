@@ -41,7 +41,7 @@ class Renderer {
 			$output .= "/*\n{$outputJql}\n*/\n\n";
 		}
 
-		echo "SET FOREIGN_KEY_CHECKS = 0;\n\n";
+		$output .= "SET FOREIGN_KEY_CHECKS = 0;\n\n";
 		foreach( $tables as $table ) {
 			if( !$table->isIsPseudo() ) {
 				if( $this->dropTables ) {

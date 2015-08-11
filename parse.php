@@ -1,7 +1,6 @@
 <?php
 
 use donatj\MySqlSchema\Columns;
-use donatj\MySqlSchema\Table;
 
 require('vendor/autoload.php');
 
@@ -57,31 +56,4 @@ try {
 } catch(\donatj\Misstep\Exceptions\UserException $e) {
 	fwrite(STDERR, "Error: " . $e->getMessage() . "\n");
 	die(1);
-}
-
-
-/**
- * @param $regex
- * @param $data
- * @return mixed
- * @throws \Exception
- */
-function checkForParseErrors( $regex, $data ) {
-	$split = preg_split($regex, $data);
-	foreach( $split as $i ) {
-		if( trim($i) ) {
-			throw new \donatj\Misstep\Exceptions\ParseException('parse error on "' . var_export(trim($i) . '"', true));
-		}
-	}
-}
-
-/**
- * @param $input
- * @return string
- */
-function parseComment( $input ) {
-	$comments = array_filter(explode("\n: ", $input));
-	$comment  = trim(implode("\n", $comments));
-
-	return $comment;
 }

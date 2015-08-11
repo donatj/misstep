@@ -64,7 +64,7 @@ class Parser {
 			$table->setIsPseudo($result[$i]['type'] == '@');
 
 			if( trim($result[$i]['comment']) ) {
-				$table->setComment(parseComment($result[$i]['comment']));
+				$table->setComment($this->parseComment($result[$i]['comment']));
 			}
 
 			$tableKeys = [ ];
@@ -108,7 +108,7 @@ class Parser {
 				}
 
 				if( trim($bodyResult[$j]['comment']) ) {
-					$col->setComment(parseComment($bodyResult[$j]['comment']));
+					$col->setComment($this->parseComment($bodyResult[$j]['comment']));
 				}
 
 				$table->addColumn($col);

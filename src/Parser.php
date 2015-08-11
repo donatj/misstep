@@ -8,6 +8,7 @@ use donatj\MySqlSchema\Columns\AbstractColumn;
 use donatj\MySqlSchema\Columns\Interfaces\OptionalLengthInterface;
 use donatj\MySqlSchema\Columns\Interfaces\RequiredLengthInterface;
 use donatj\MySqlSchema\Columns\Interfaces\SignedInterface;
+use donatj\MySqlSchema\Columns\Numeric\AbstractIntegerColumn;
 
 class Parser {
 
@@ -115,7 +116,11 @@ class Parser {
 				if( $bodyResult[$j]['pk'] == " pk" ) {
 					$table->addPrimaryKey($col);
 				} elseif( $bodyResult[$j]['pk'] == " *pk" ) {
-					$table->addAutoIncrement($col);
+					if( $col instanceof AbstractIntegerColumn ) {
+						$table->addAutoIncrement($col);
+					} else {
+						throw new StructureException('auto-increment primary keys must be an integer type, given: ' . $col->getTypeName());
+					}
 				}
 
 				if( trim($bodyResult[$j]['keys']) != '' ) {

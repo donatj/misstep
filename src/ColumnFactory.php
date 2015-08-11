@@ -26,7 +26,7 @@ class ColumnFactory {
 	 * @return \donatj\MySqlSchema\Columns\Numeric\Integers\BigIntColumn|\donatj\MySqlSchema\Columns\Numeric\Integers\IntColumn|\donatj\MySqlSchema\Columns\Numeric\Integers\MediumIntColumn|\donatj\MySqlSchema\Columns\Numeric\Integers\SmallIntColumn|\donatj\MySqlSchema\Columns\Numeric\Integers\TinyIntColumn|null
 	 * @throws \donatj\Misstep\Exceptions\StructureException
 	 */
-	function make( $colType, $colName ) {
+	public function make( $colType, $colName ) {
 		switch( $colType ) {
 			case 'bool':
 				$col = new TinyIntColumn($colName);

@@ -31,7 +31,7 @@ class Parser {
 	 */
 	protected $columnFactory;
 
-	function __construct( ColumnFactory $columnFactory ) {
+	public function __construct( ColumnFactory $columnFactory ) {
 		$this->columnFactory = $columnFactory;
 	}
 

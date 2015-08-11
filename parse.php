@@ -14,38 +14,12 @@ $columnFactory = new \donatj\Misstep\ColumnFactory();
 
 $flags->parse();
 
-// @todo make availible from mysql-schema
-function escape( $input, $wrapChar = '`' ) {
-	return str_replace($wrapChar, $wrapChar . $wrapChar, $input);
-}
-
-/**
- * @param $jql
- * @throws \Exception
- * @throws \donatj\Misstep\Exceptions\ParseException
- * @throws \donatj\Misstep\Exceptions\StructureException
- */
 function parse( $jql, \donatj\Misstep\ColumnFactory $columnFactory, $drop, $inputComment ) {
-	$parser = new \donatj\Misstep\Parser($columnFactory);
+	$parser   = new \donatj\Misstep\Parser($columnFactory);
+	$renderer = new \donatj\Misstep\Renderer($jql, $inputComment, $drop);
 
 	$tables = $parser->parse($jql);
-
-	if( $inputComment ) {
-		$outputJql = rtrim($jql);
-		echo "/*\n{$outputJql}\n*/\n\n";
-	}
-
-	echo "SET FOREIGN_KEY_CHECKS = 0;\n\n";
-	foreach( $tables as $table ) {
-		if( !$table->isIsPseudo() ) {
-			if( $drop ) {
-				echo "DROP TABLE IF EXISTS `" . escape($table->getName()) . "`;\n";
-			}
-			echo $table->toString();
-			echo "\n";
-		}
-	}
-	echo "SET FOREIGN_KEY_CHECKS = 1;\n";
+	echo $renderer->render($tables);
 }
 
 try {

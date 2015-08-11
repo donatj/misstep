@@ -158,24 +158,7 @@ class Parser {
 			$tables[$table->getName()] = $table;
 		}
 
-		foreach( $foreignKeys['children'] as $name => $fks ) {
-			if( !isset($foreignKeys['parents'][$name]) ) {
-				throw new StructureException("unknown foreign key: {$name}");
-			}
-
-			$remote = $foreignKeys['parents'][$name];
-
-			/**
-			 * @var $local AbstractColumn
-			 * @var $tbl ParseTable
-			 */
-			foreach( $fks as $local ) {
-				$fkTables = $local->getTables();
-				$tbl      = current($fkTables);
-
-				$tbl->addForeignKey($local, $remote);
-			}
-		}
+		$this->linkForeignKeys($foreignKeys);
 
 		return $tables;
 	}
@@ -203,6 +186,31 @@ class Parser {
 		$comment  = trim(implode("\n", $comments));
 
 		return $comment;
+	}
+
+	/**
+	 * @param $foreignKeys
+	 * @throws \donatj\Misstep\Exceptions\StructureException
+	 */
+	private function linkForeignKeys( array $foreignKeys ) {
+		foreach( $foreignKeys['children'] as $name => $fks ) {
+			if( !isset($foreignKeys['parents'][$name]) ) {
+				throw new StructureException("unknown foreign key: {$name}");
+			}
+
+			$remote = $foreignKeys['parents'][$name];
+
+			/**
+			 * @var $local AbstractColumn
+			 * @var $tbl ParseTable
+			 */
+			foreach( $fks as $local ) {
+				$fkTables = $local->getTables();
+				$tbl      = current($fkTables);
+
+				$tbl->addForeignKey($local, $remote);
+			}
+		}
 	}
 
 }

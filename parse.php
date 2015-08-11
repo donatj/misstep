@@ -14,19 +14,16 @@ $columnFactory = new \donatj\Misstep\ColumnFactory();
 
 $flags->parse();
 
-function parse( $jql, \donatj\Misstep\ColumnFactory $columnFactory, $drop, $inputComment ) {
+try {
+	if( trim($jql) == '' ) {
+		return '';
+	}
+
 	$parser   = new \donatj\Misstep\Parser($columnFactory);
 	$renderer = new \donatj\Misstep\Renderer($jql, $inputComment, $drop);
 
 	$tables = $parser->parse($jql);
 	echo $renderer->render($tables);
-}
-
-try {
-	if( trim($jql) == '' ) {
-		return '';
-	}
-	parse($jql, $columnFactory, $drop, $inputComment);
 } catch(\donatj\Misstep\Exceptions\UserException $e) {
 	fwrite(STDERR, "Error: " . $e->getMessage() . "\n");
 	die(1);

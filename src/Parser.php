@@ -56,7 +56,9 @@ class Parser {
 		 */
 		$foreignKeys = [ 'parents' => [ ], 'children' => [ ] ];
 		$tables      = [ ];
-		for( $i = 0; $i < count($result); $i++ ) {
+
+		$resultCount = count($result);
+		for( $i = 0; $i < $resultCount; $i++ ) {
 			$body = $result[$i]['body'] . "\n";
 
 			$table = new ParseTable($result[$i]['declaration']);
@@ -72,10 +74,11 @@ class Parser {
 
 			$this->checkForParseErrors(self::COLUMN_MATCH, $body);
 			preg_match_all(self::COLUMN_MATCH, $body, $bodyResult, PREG_SET_ORDER);
-			for( $j = 0; $j < count($bodyResult); $j++ ) {
+
+			$bodyResultCount = count($bodyResult);
+			for( $j = 0; $j < $bodyResultCount; $j++ ) {
 
 				$colName = $bodyResult[$j]['colName'];
-
 				$colType = $bodyResult[$j]['colType'];
 
 				$col = $this->columnFactory->make($colType, $colName);

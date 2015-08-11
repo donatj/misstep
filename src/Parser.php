@@ -37,7 +37,7 @@ class Parser {
 
 	/**
 	 * @param string $jql
-	 * @return \donatj\Misstep\GenerationTable[]
+	 * @return \donatj\Misstep\ParseTable[]
 	 * @throws \donatj\Misstep\Exceptions\ParseException
 	 * @throws \donatj\Misstep\Exceptions\StructureException
 	 */
@@ -51,14 +51,14 @@ class Parser {
 		preg_match_all(self::TABLESET_MATCH, $jql, $result, PREG_SET_ORDER);
 
 		/**
-		 * @var $tables GenerationTable[]
+		 * @var $tables ParseTable[]
 		 */
 		$foreignKeys = [ 'parents' => [ ], 'children' => [ ] ];
 		$tables      = [ ];
 		for( $i = 0; $i < count($result); $i++ ) {
 			$body = $result[$i]['body'] . "\n";
 
-			$table = new GenerationTable($result[$i]['declaration']);
+			$table = new ParseTable($result[$i]['declaration']);
 			$table->setCharset('utf8');
 			$table->setCollation('utf8_general_ci');
 			$table->setIsPseudo($result[$i]['type'] == '@');
@@ -167,7 +167,7 @@ class Parser {
 
 			/**
 			 * @var $local AbstractColumn
-			 * @var $tbl GenerationTable
+			 * @var $tbl ParseTable
 			 */
 			foreach( $fks as $local ) {
 				$fkTables = $local->getTables();

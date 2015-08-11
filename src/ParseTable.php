@@ -4,7 +4,7 @@ namespace donatj\Misstep;
 
 use donatj\MySqlSchema\Table;
 
-class GenerationTable extends Table {
+class ParseTable extends Table {
 
 	/**
 	 * @var bool

@@ -157,6 +157,13 @@ class Parser {
 					}, '');
 					$keyName .= '_' . $tk;
 
+					if( strlen($keyName) > 64 ) {
+						$keyName = array_reduce($tcols, function ( $carry, AbstractColumn $item ) use ( $type ) {
+							$name = $this->getShortColumnNameAcronym($item->getName());
+							return ($carry ? $carry . '_and_' : ($type == 'UNIQUE' ? 'unq_' : 'idx_')) . $name;
+						}, '');
+					}
+
 					foreach( $tcols as $tcol ) {
 						$table->addKeyColumn($keyName, $tcol, null, $type);
 					}
@@ -219,6 +226,17 @@ class Parser {
 				$tbl->addForeignKey($local, $remote);
 			}
 		}
+	}
+
+	/**
+	 * @todo Handle camel case and other weird things people might do
+	 * @param $columnName
+	 * @return string
+	 */
+	private function getShortColumnNameAcronym( $columnName ) {
+		$parts = explode('_', $columnName);
+
+		return implode(array_map(function ( $part ) { return $part[0]; }, $parts));
 	}
 
 }

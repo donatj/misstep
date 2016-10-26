@@ -116,9 +116,9 @@ class Parser {
 				}
 
 				$table->addColumn($col);
-				if( $bodyResult[$j]['pk'] == " pk" ) {
+				if( trim($bodyResult[$j]['pk']) == "pk" ) {
 					$table->addPrimaryKey($col);
-				} elseif( $bodyResult[$j]['pk'] == " *pk" ) {
+				} elseif( trim($bodyResult[$j]['pk']) == "*pk" ) {
 					if( $col instanceof AbstractIntegerColumn ) {
 						$table->addAutoIncrement($col);
 					} else {

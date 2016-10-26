@@ -54,8 +54,8 @@ class Parser {
 		/**
 		 * @var $tables ParseTable[]
 		 */
-		$foreignKeys = [ 'parents' => [ ], 'children' => [ ] ];
-		$tables      = [ ];
+		$foreignKeys = [ 'parents' => [], 'children' => [] ];
+		$tables      = [];
 
 		$resultCount = count($result);
 		for( $i = 0; $i < $resultCount; $i++ ) {
@@ -70,7 +70,7 @@ class Parser {
 				$table->setComment($this->parseComment($result[$i]['comment']));
 			}
 
-			$tableKeys = [ ];
+			$tableKeys = [];
 
 			$this->checkForParseErrors(self::COLUMN_MATCH, $body);
 			preg_match_all(self::COLUMN_MATCH, $body, $bodyResult, PREG_SET_ORDER);
@@ -160,6 +160,7 @@ class Parser {
 					if( strlen($keyName) > 64 ) {
 						$keyName = array_reduce($tcols, function ( $carry, AbstractColumn $item ) use ( $type ) {
 							$name = $this->getShortColumnNameAcronym($item->getName());
+
 							return ($carry ? $carry . '_and_' : ($type == 'UNIQUE' ? 'unq_' : 'idx_')) . $name;
 						}, '');
 					}

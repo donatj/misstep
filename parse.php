@@ -12,7 +12,13 @@ $inputComment =& $flags->bool('input-comment', false, 'Include original input as
 
 $columnFactory = new \donatj\Misstep\ColumnFactory();
 
-$flags->parse();
+try {
+	$flags->parse();
+}catch(Exception $e) {
+	echo $e->getMessage() . "\n";
+	echo $flags->getDefaults();
+	die(1);
+}
 
 try {
 	if( trim($jql) == '' ) {

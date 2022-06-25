@@ -3,8 +3,6 @@
 
 require __DIR__ . '/vendor/autoload.php';
 
-$jql = file_get_contents('php://stdin');
-
 $flags        = new donatj\Flags;
 $drop         =& $flags->bool('drop', false, 'Include DROP TABLE?');
 $inputComment =& $flags->bool('input-comment', false, 'Include original input as a comment?');
@@ -19,6 +17,8 @@ try {
 
 	die(1);
 }
+
+$jql = file_get_contents('php://stdin');
 
 try {
 	if( trim($jql) == '' ) {

@@ -5,11 +5,11 @@ require __DIR__ . '/vendor/autoload.php';
 
 $jql = file_get_contents('php://stdin');
 
-$flags        = new donatj\Flags();
+$flags        = new donatj\Flags;
 $drop         =& $flags->bool('drop', false, 'Include DROP TABLE?');
 $inputComment =& $flags->bool('input-comment', false, 'Include original input as a comment?');
 
-$columnFactory = new \donatj\Misstep\ColumnFactory();
+$columnFactory = new \donatj\Misstep\ColumnFactory;
 
 try {
 	$flags->parse();

@@ -82,8 +82,8 @@ class Parser {
 				$col = $this->columnFactory->make($colType, $colName);
 
 				if(
-					$bodyResult[$j]['colLength'] &&
-					($col instanceof RequiredLengthInterface
+					$bodyResult[$j]['colLength']
+					&& ($col instanceof RequiredLengthInterface
 					 || $col instanceof OptionalLengthInterface)
 				) {
 					$col->setLength($bodyResult[$j]['colLength']);
@@ -142,6 +142,7 @@ class Parser {
 					if( !empty($foreignKeys['parents'][$col->getName()]) ) {
 						throw new StructureException("foreign key remote {$col->getName()} already defined.");
 					}
+
 					$foreignKeys['parents'][$col->getName()] = $col;
 				} elseif( $bodyResult[$j]['signal'] == '?' ) {
 					$foreignKeys['children'][$col->getName()][] = $col;
@@ -150,13 +151,13 @@ class Parser {
 
 			foreach( $tableKeys as $type => $tKeys ) {
 				foreach( $tKeys as $tk => $tcols ) {
-					$keyName = array_reduce($tcols, function ( $carry, AbstractColumn $item ) use ( $type ) {
+					$keyName = array_reduce($tcols, function( $carry, AbstractColumn $item ) use ( $type ) {
 						return ($carry ? $carry . '_and_' : ($type == 'UNIQUE' ? 'unq_' : 'idx_')) . $item->getName();
 					}, '');
 					$keyName .= '_' . $tk;
 
 					if( strlen($keyName) > 64 ) {
-						$keyName = array_reduce($tcols, function ( $carry, AbstractColumn $item ) use ( $type ) {
+						$keyName = array_reduce($tcols, function( $carry, AbstractColumn $item ) use ( $type ) {
 							$name = $this->getShortColumnNameAcronym($item->getName());
 
 							return ($carry ? $carry . '_and_' : ($type == 'UNIQUE' ? 'unq_' : 'idx_')) . $name;
@@ -202,7 +203,6 @@ class Parser {
 	}
 
 	/**
-	 * @param $foreignKeys
 	 * @throws \donatj\Misstep\Exceptions\StructureException
 	 */
 	private function linkForeignKeys( array $foreignKeys ) {
@@ -228,13 +228,13 @@ class Parser {
 
 	/**
 	 * @todo Handle camel case and other weird things people might do
-	 * @param $columnName
+	 * @param string $columnName
 	 * @return string
 	 */
 	private function getShortColumnNameAcronym( $columnName ) {
 		$parts = explode('_', $columnName);
 
-		return implode(array_map(function ( $part ) { return $part[0]; }, $parts));
+		return implode(array_map(function( $part ) { return $part[0]; }, $parts));
 	}
 
 }

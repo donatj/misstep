@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 
-require(__DIR__ . '/vendor/autoload.php');
+require __DIR__ . '/vendor/autoload.php';
 
 $jql = file_get_contents('php://stdin');
 
@@ -16,6 +16,7 @@ try {
 } catch( Exception $e ) {
 	echo $e->getMessage() . "\n";
 	echo $flags->getDefaults();
+
 	die(1);
 }
 
@@ -31,5 +32,6 @@ try {
 	echo $renderer->render($tables);
 } catch( \donatj\Misstep\Exceptions\UserException $e ) {
 	fwrite(STDERR, "Error: " . $e->getMessage() . "\n");
+
 	die(1);
 }

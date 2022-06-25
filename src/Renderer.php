@@ -4,19 +4,13 @@ namespace donatj\Misstep;
 
 class Renderer {
 
-	/**
-	 * @var string
-	 */
+	/** @var string */
 	protected $input;
 
-	/**
-	 * @var bool
-	 */
+	/** @var bool */
 	protected $inputComment;
 
-	/**
-	 * @var bool
-	 */
+	/** @var bool */
 	protected $dropTables;
 
 	/**
@@ -47,13 +41,13 @@ class Renderer {
 				if( $this->dropTables ) {
 					$output .= "DROP TABLE IF EXISTS `" . $this->escape($table->getName()) . "`;\n";
 				}
+
 				$output .= $table->toString();
 				$output .= "\n";
 			}
 		}
-		$output .= "SET FOREIGN_KEY_CHECKS = 1;\n";
 
-		return $output;
+		return $output . "SET FOREIGN_KEY_CHECKS = 1;\n";
 	}
 
 	// @todo make availible from mysql-schema

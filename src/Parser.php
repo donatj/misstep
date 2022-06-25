@@ -27,9 +27,7 @@ class Parser {
 		(?P<uniques>(?:[ \t]+u\d+)*)
 		(?P<comment>\n(?::[ \t].*\n?)*)/x';
 
-	/**
-	 * @var ColumnFactory
-	 */
+	/** @var ColumnFactory */
 	protected $columnFactory;
 
 	public function __construct( ColumnFactory $columnFactory ) {
@@ -38,9 +36,9 @@ class Parser {
 
 	/**
 	 * @param string $jql
-	 * @return \donatj\Misstep\ParseTable[]
 	 * @throws \donatj\Misstep\Exceptions\ParseException
 	 * @throws \donatj\Misstep\Exceptions\StructureException
+	 * @return \donatj\Misstep\ParseTable[]
 	 */
 	public function parse( $jql ) {
 		$jql = preg_replace('%^//.*$%mx', '', $jql); //remove commented lines before parse
@@ -52,7 +50,7 @@ class Parser {
 		preg_match_all(self::TABLESET_MATCH, $jql, $result, PREG_SET_ORDER);
 
 		/**
-		 * @var $tables ParseTable[]
+		 * @var ParseTable[] $tables
 		 */
 		$foreignKeys = [ 'parents' => [], 'children' => [] ];
 		$tables      = [];
@@ -199,9 +197,8 @@ class Parser {
 	 */
 	protected function parseComment( $input ) {
 		$comments = array_filter(explode("\n: ", $input));
-		$comment  = trim(implode("\n", $comments));
 
-		return $comment;
+		return trim(implode("\n", $comments));
 	}
 
 	/**
@@ -217,8 +214,8 @@ class Parser {
 			$remote = $foreignKeys['parents'][$name];
 
 			/**
-			 * @var $local AbstractColumn
-			 * @var $tbl ParseTable
+			 * @var AbstractColumn $local
+			 * @var ParseTable $tbl
 			 */
 			foreach( $fks as $local ) {
 				$fkTables = $local->getTables();

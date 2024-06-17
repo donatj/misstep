@@ -3,6 +3,7 @@
 namespace donatj\Misstep;
 
 use donatj\Misstep\Exceptions\ParseException;
+use donatj\Misstep\Exceptions\RuntimeException;
 use donatj\Misstep\Exceptions\StructureException;
 use donatj\MySqlSchema\Columns\AbstractColumn;
 use donatj\MySqlSchema\Columns\Interfaces\OptionalLengthInterface;
@@ -34,31 +35,44 @@ class Parser {
 	}
 
 	/**
-	 * @return \donatj\Misstep\ParseTable[]
+	 * @return array<string,\donatj\Misstep\ParseTable>
 	 * @throws \donatj\Misstep\Exceptions\ParseException
 	 * @throws \donatj\Misstep\Exceptions\StructureException
 	 */
 	public function parse( string $jql ) : array {
 		$jql = preg_replace('%^//.*$%mx', '', $jql); // remove commented lines before parse
+		if( $jql === null ) {
+			throw new RuntimeException('failed while parsing comments');
+		}
+
 		$jql = preg_replace('/[ \t]+$/m', '', $jql); // remove trailing whitespace from lines
+		if( $jql === null ) {
+			throw new RuntimeException('failed while removing trailing whitespace');
+		}
 		$jql .= "\n";
 
 		$this->checkForParseErrors(self::TABLESET_MATCH, $jql);
 
 		preg_match_all(self::TABLESET_MATCH, $jql, $result, PREG_SET_ORDER);
 
+
+		/**
+		 * @var array{children:array<string,AbstractColumn[]>,parents:array<string,AbstractColumn>} $foreignKeys
+		 */
+		$foreignKeys = [ 'parents' => [], 'children' => [] ];
 		/**
 		 * @var ParseTable[] $tables
 		 */
-		$foreignKeys = [ 'parents' => [], 'children' => [] ];
-		$tables      = [];
+		$tables = [];
 
 		$resultCount = count($result);
 		for( $i = 0; $i < $resultCount; $i++ ) {
 			$body = $result[$i]['body'] . "\n";
 
 			$table = new ParseTable($result[$i]['declaration']);
+			// @phpstan-ignore argument.type
 			$table->setCharset('utf8');
+			// @phpstan-ignore argument.type
 			$table->setCollation('utf8_general_ci');
 			$table->setIsPseudo($result[$i]['type'] === '@');
 
@@ -82,8 +96,6 @@ class Parser {
 					throw new ParseException('only foreign keys and foreign key definitions can have an explicit reference');
 				}
 
-				$ref = $ref ?: $colName;
-
 				// replace * with table name
 				$colName = preg_replace_callback('/\\\\?\*/', function( $matches ) use ( $table ) {
 					if( str_starts_with($matches[0], '\\') ) {
@@ -93,14 +105,21 @@ class Parser {
 					return $table->getName();
 				}, $colName);
 
+				if( $colName === null ) {
+					throw new RuntimeException('failed while replacing * with table name');
+				}
+
+				$ref = $ref ?: $colName;
+
 				$col = $this->columnFactory->make($colType, $colName);
 
+				$colLength = intval($bodyResult[$j]['colLength']);
 				if(
-					$bodyResult[$j]['colLength']
+					$colLength > 0
 					&& ($col instanceof RequiredLengthInterface
 						|| $col instanceof OptionalLengthInterface)
 				) {
-					$col->setLength($bodyResult[$j]['colLength']);
+					$col->setLength($colLength);
 				}
 
 				if( $bodyResult[$j]['signed'] ) {
@@ -197,8 +216,12 @@ class Parser {
 	 */
 	protected function checkForParseErrors( string $regex, string $data ) : void {
 		$split = preg_split($regex, $data);
+		if( $split === false ) {
+			throw new RuntimeException('failed to split data');
+		}
+
 		foreach( $split as $i ) {
-			if( trim($i) ) {
+			if( trim($i) !== '' ) {
 				throw new ParseException('parse error on "' . var_export(trim($i) . '"', true));
 			}
 		}
@@ -224,6 +247,9 @@ class Parser {
 			foreach( $fks as $local ) {
 				$fkTables = $local->getTables();
 				$tbl      = current($fkTables);
+				if( $tbl === false ) {
+					throw new RuntimeException('failed to get table from column');
+				}
 
 				if( $local->getTypeName() !== $remote->getTypeName() ) {
 					throw new StructureException("{$local->getName()} type does not match defined foreign key type");

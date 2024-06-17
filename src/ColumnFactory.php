@@ -23,9 +23,8 @@ class ColumnFactory {
 
 	/**
 	 * @throws \donatj\Misstep\Exceptions\StructureException
-	 * @return \donatj\MySqlSchema\Columns\Numeric\Integers\BigIntColumn|\donatj\MySqlSchema\Columns\Numeric\Integers\IntColumn|\donatj\MySqlSchema\Columns\Numeric\Integers\MediumIntColumn|\donatj\MySqlSchema\Columns\Numeric\Integers\SmallIntColumn|\donatj\MySqlSchema\Columns\Numeric\Integers\TinyIntColumn|null
 	 */
-	public function make( string $colType, string $colName ) : AbstractColumn {
+	public function make( string $colType, string $colName ) : DateTimeColumn|TinyTextColumn|SmallIntColumn|IntColumn|CharColumn|MediumIntColumn|TimestampColumn|MediumTextColumn|YearColumn|LongTextColumn|TinyIntColumn|BigIntColumn|VarcharColumn|TextColumn {
 
 		$makeBool = function( string $colName ) : TinyIntColumn {
 			$col = new TinyIntColumn($colName);
@@ -47,7 +46,7 @@ class ColumnFactory {
 			'longtext'   => new LongTextColumn($colName),
 			'char'       => new CharColumn($colName, 255),
 			'varchar'    => new VarcharColumn($colName, 255),
-			'timestamp'  => new TimestampColumn($colName, 255),
+			'timestamp'  => new TimestampColumn($colName),
 			'year'       => new YearColumn($colName, 4),
 			'datetime'   => new DateTimeColumn($colName),
 			default      => throw new StructureException('unknown type: ' . $colType),

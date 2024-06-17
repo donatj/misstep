@@ -1,6 +1,11 @@
 #!/usr/bin/env php
 <?php
 
+use donatj\Misstep\ColumnFactory;
+use donatj\Misstep\Exceptions\UserException;
+use donatj\Misstep\Parser;
+use donatj\Misstep\Renderer;
+
 $files = [
 	__DIR__ . '/../../vendor/autoload.php',
 	__DIR__ . '/../../../../autoload.php',
@@ -17,7 +22,7 @@ $flags        = new donatj\Flags;
 $drop         =& $flags->bool('drop', false, 'Include DROP TABLE?');
 $inputComment =& $flags->bool('input-comment', false, 'Include original input as a comment?');
 
-$columnFactory = new \donatj\Misstep\ColumnFactory;
+$columnFactory = new ColumnFactory;
 
 try {
 	$flags->parse();
@@ -28,20 +33,40 @@ try {
 	die(1);
 }
 
+$stderr = fopen('php://stderr', 'wb');
+if( $stderr === false ) {
+	echo "Error: Unable to open stderr\n";
+
+	die(1);
+}
+
 $jql = file_get_contents('php://stdin');
+if( $jql === false ) {
+	fwrite($stderr, "Error: Unable to read from stdin\n");
+
+	die(1);
+}
 
 try {
-	if( trim($jql) == '' ) {
-		return '';
+	if( trim($jql) === '' ) {
+		return;
 	}
 
-	$parser   = new \donatj\Misstep\Parser($columnFactory);
-	$renderer = new \donatj\Misstep\Renderer($jql, $inputComment, $drop);
+	$parser   = new Parser($columnFactory);
+	$renderer = new Renderer(
+		$jql,
+		$inputComment, // @phpstan-ignore argument.type
+		$drop, // @phpstan-ignore argument.type
+	);
 
 	$tables = $parser->parse($jql);
 	echo $renderer->render($tables);
-} catch( \donatj\Misstep\Exceptions\UserException $e ) {
-	fwrite(STDERR, "Error: " . $e->getMessage() . "\n");
+} catch( UserException $e ) {
+	fwrite($stderr, "Error: " . $e->getMessage() . "\n");
 
 	die(1);
+}catch( RuntimeException $e ) {
+	fwrite($stderr, "Unexpected Error: " . $e->getMessage() . "\n");
+
+	die(3);
 }

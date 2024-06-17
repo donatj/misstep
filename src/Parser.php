@@ -15,11 +15,12 @@ class Parser {
 	private const TABLESET_MATCH = '/(?P<type>[#@])\s(?P<declaration>.*)
 		(?P<comment>\n(?::\s.*\n?)*)
 		(?P<body>
-		    (?:[-!?]\s.*\n
+		    (?:[-!?]\s+.*\n
 		    (?::\s.*\n)*)+
 		)/x';
 
-	private const COLUMN_MATCH = '/(?P<signal>[-?!])[ \t](?P<colName>\S+)
+	private const COLUMN_MATCH = '/(?P<signal>[-?!])
+		[ \t]+(?:(?P<ref>\S*):)?(?P<colName>\S+)
 		[ \t]+(?P<nullable>\*)?(?P<signed>-)?(?P<colType>[a-z]+)(?P<colLength>\d+)?(?P<colDecimal>,\d+)?
 		(?:(?P<hasDefault>=)(?:\'(?P<default1>(?:\'\'|[^\'])*)\'|(?P<default2>\S+)))?
 		(?P<pk>[ \t]+\*?pk)?
@@ -74,6 +75,14 @@ class Parser {
 			for( $j = 0; $j < $bodyResultCount; $j++ ) {
 				$colName = $bodyResult[$j]['colName'];
 				$colType = $bodyResult[$j]['colType'];
+
+				$signal = $bodyResult[$j]['signal'];
+				$ref    = $bodyResult[$j]['ref'];
+				if( $signal === '-' && $ref !== '' ) {
+					throw new ParseException('only foreign keys and foreign key definitions can have an explicit reference');
+				}
+
+				$ref = $ref ?: $colName;
 
 				// replace * with table name
 				$colName = preg_replace_callback('/\\\\?\*/', function( $matches ) use ( $table ) {
@@ -143,14 +152,14 @@ class Parser {
 					}
 				}
 
-				if( $bodyResult[$j]['signal'] === '!' ) {
-					if( !empty($foreignKeys['parents'][$col->getName()]) ) {
-						throw new StructureException("foreign key remote {$col->getName()} already defined.");
+				if( $signal === '!' ) {
+					if( !empty($foreignKeys['parents'][$ref]) ) {
+						throw new StructureException("foreign key remote {$ref} already defined.");
 					}
 
-					$foreignKeys['parents'][$col->getName()] = $col;
-				} elseif( $bodyResult[$j]['signal'] === '?' ) {
-					$foreignKeys['children'][$col->getName()][] = $col;
+					$foreignKeys['parents'][$ref] = $col;
+				} elseif( $signal === '?' ) {
+					$foreignKeys['children'][$ref][] = $col;
 				}
 			}
 
@@ -209,7 +218,7 @@ class Parser {
 		foreach( $foreignKeys['children'] as $name => $fks ) {
 			$remote = $foreignKeys['parents'][$name] ?? null;
 			if( $remote === null ) {
-				throw new StructureException("unknown foreign key: {$name}");
+				throw new StructureException("unknown foreign key ref: {$name}");
 			}
 
 			foreach( $fks as $local ) {

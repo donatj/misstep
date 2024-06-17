@@ -6,20 +6,13 @@ use donatj\MySqlSchema\Table;
 
 class ParseTable extends Table {
 
-	/** @var bool */
-	protected $isPseudo = false;
+	protected bool $isPseudo = false;
 
-	/**
-	 * @return bool
-	 */
-	public function isIsPseudo() {
+	public function isIsPseudo() : bool {
 		return $this->isPseudo;
 	}
 
-	/**
-	 * @param bool $isPseudo
-	 */
-	public function setIsPseudo( $isPseudo ) {
+	public function setIsPseudo( bool $isPseudo ) : void {
 		$this->isPseudo = $isPseudo;
 	}
 

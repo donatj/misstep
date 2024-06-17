@@ -12,14 +12,14 @@ use donatj\MySqlSchema\Columns\Numeric\AbstractIntegerColumn;
 
 class Parser {
 
-	const TABLESET_MATCH = '/(?P<type>[#@])\s(?P<declaration>.*)
+	private const TABLESET_MATCH = '/(?P<type>[#@])\s(?P<declaration>.*)
 		(?P<comment>\n(?::\s.*\n?)*)
 		(?P<body>
 		    (?:[-!?]\s.*\n
 		    (?::\s.*\n)*)+
 		)/x';
 
-	const COLUMN_MATCH = '/(?P<signal>[-?!])[ \t](?P<colName>\S+)
+	private const COLUMN_MATCH = '/(?P<signal>[-?!])[ \t](?P<colName>\S+)
 		[ \t]+(?P<nullable>\*)?(?P<signed>-)?(?P<colType>[a-z]+)(?P<colLength>\d+)?(?P<colDecimal>,\d+)?
 		(?:(?P<hasDefault>=)(?:\'(?P<default1>(?:\'\'|[^\'])*)\'|(?P<default2>\S+)))?
 		(?P<pk>[ \t]+\*?pk)?
@@ -27,22 +27,18 @@ class Parser {
 		(?P<uniques>(?:[ \t]+u\d+)*)
 		(?P<comment>\n(?::[ \t].*\n?)*)/x';
 
-	/** @var ColumnFactory */
-	protected $columnFactory;
-
-	public function __construct( ColumnFactory $columnFactory ) {
-		$this->columnFactory = $columnFactory;
-	}
+	public function __construct(
+		protected readonly ColumnFactory $columnFactory,
+	) {}
 
 	/**
-	 * @param string $jql
-	 * @throws \donatj\Misstep\Exceptions\ParseException
 	 * @throws \donatj\Misstep\Exceptions\StructureException
+	 * @throws \donatj\Misstep\Exceptions\ParseException
 	 * @return \donatj\Misstep\ParseTable[]
 	 */
-	public function parse( $jql ) {
-		$jql = preg_replace('%^//.*$%mx', '', $jql); //remove commented lines before parse
-		$jql = preg_replace('/[ \t]+$/m', '', $jql); //remove trailing whitespace from lines
+	public function parse( string $jql ) : array {
+		$jql = preg_replace('%^//.*$%mx', '', $jql); // remove commented lines before parse
+		$jql = preg_replace('/[ \t]+$/m', '', $jql); // remove trailing whitespace from lines
 		$jql .= "\n";
 
 		$this->checkForParseErrors(self::TABLESET_MATCH, $jql);
@@ -62,7 +58,7 @@ class Parser {
 			$table = new ParseTable($result[$i]['declaration']);
 			$table->setCharset('utf8');
 			$table->setCollation('utf8_general_ci');
-			$table->setIsPseudo($result[$i]['type'] == '@');
+			$table->setIsPseudo($result[$i]['type'] === '@');
 
 			if( trim($result[$i]['comment']) ) {
 				$table->setComment($this->parseComment($result[$i]['comment']));
@@ -75,9 +71,17 @@ class Parser {
 
 			$bodyResultCount = count($bodyResult);
 			for( $j = 0; $j < $bodyResultCount; $j++ ) {
-
 				$colName = $bodyResult[$j]['colName'];
 				$colType = $bodyResult[$j]['colType'];
+
+				// replace * with table name
+				$colName = preg_replace_callback('/\\\\?\*/', function( $matches ) use ( $table ) {
+					if(str_starts_with($matches[0], '\\')) {
+						return '*';
+					}
+
+					return $table->getName();
+				}, $colName);
 
 				$col = $this->columnFactory->make($colType, $colName);
 
@@ -114,9 +118,9 @@ class Parser {
 				}
 
 				$table->addColumn($col);
-				if( trim($bodyResult[$j]['pk']) == "pk" ) {
+				if( trim($bodyResult[$j]['pk']) === "pk" ) {
 					$table->addPrimaryKey($col);
-				} elseif( trim($bodyResult[$j]['pk']) == "*pk" ) {
+				} elseif( trim($bodyResult[$j]['pk']) === "*pk" ) {
 					if( $col instanceof AbstractIntegerColumn ) {
 						$table->addAutoIncrement($col);
 					} else {
@@ -138,13 +142,13 @@ class Parser {
 					}
 				}
 
-				if( $bodyResult[$j]['signal'] == '!' ) {
+				if( $bodyResult[$j]['signal'] === '!' ) {
 					if( !empty($foreignKeys['parents'][$col->getName()]) ) {
 						throw new StructureException("foreign key remote {$col->getName()} already defined.");
 					}
 
 					$foreignKeys['parents'][$col->getName()] = $col;
-				} elseif( $bodyResult[$j]['signal'] == '?' ) {
+				} elseif( $bodyResult[$j]['signal'] === '?' ) {
 					$foreignKeys['children'][$col->getName()][] = $col;
 				}
 			}
@@ -179,11 +183,9 @@ class Parser {
 	}
 
 	/**
-	 * @param string $regex
-	 * @param string $data
 	 * @throws \donatj\Misstep\Exceptions\ParseException
 	 */
-	protected function checkForParseErrors( $regex, $data ) {
+	protected function checkForParseErrors( string $regex, string $data ) : void {
 		$split = preg_split($regex, $data);
 		foreach( $split as $i ) {
 			if( trim($i) ) {
@@ -192,11 +194,7 @@ class Parser {
 		}
 	}
 
-	/**
-	 * @param string $input
-	 * @return string
-	 */
-	protected function parseComment( $input ) {
+	protected function parseComment( string $input ) : string {
 		$comments = array_filter(explode("\n: ", $input));
 
 		return trim(implode("\n", $comments));
@@ -205,7 +203,7 @@ class Parser {
 	/**
 	 * @throws \donatj\Misstep\Exceptions\StructureException
 	 */
-	private function linkForeignKeys( array $foreignKeys ) {
+	private function linkForeignKeys( array $foreignKeys ) : void {
 		foreach( $foreignKeys['children'] as $name => $fks ) {
 			if( !isset($foreignKeys['parents'][$name]) ) {
 				throw new StructureException("unknown foreign key: {$name}");
@@ -228,10 +226,8 @@ class Parser {
 
 	/**
 	 * @todo Handle camel case and other weird things people might do
-	 * @param string $columnName
-	 * @return string
 	 */
-	private function getShortColumnNameAcronym( $columnName ) {
+	private function getShortColumnNameAcronym( string $columnName ) : string {
 		$parts = explode('_', $columnName);
 
 		return implode(array_map(function( $part ) { return $part[0]; }, $parts));

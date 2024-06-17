@@ -3,6 +3,7 @@
 namespace donatj\Misstep;
 
 use donatj\Misstep\Exceptions\StructureException;
+use donatj\MySqlSchema\Columns\AbstractColumn;
 use donatj\MySqlSchema\Columns\Numeric\Integers\BigIntColumn;
 use donatj\MySqlSchema\Columns\Numeric\Integers\IntColumn;
 use donatj\MySqlSchema\Columns\Numeric\Integers\MediumIntColumn;
@@ -21,52 +22,36 @@ use donatj\MySqlSchema\Columns\Temporal\YearColumn;
 class ColumnFactory {
 
 	/**
-	 * @param string $colType
-	 * @param string $colName
 	 * @throws \donatj\Misstep\Exceptions\StructureException
 	 * @return \donatj\MySqlSchema\Columns\Numeric\Integers\BigIntColumn|\donatj\MySqlSchema\Columns\Numeric\Integers\IntColumn|\donatj\MySqlSchema\Columns\Numeric\Integers\MediumIntColumn|\donatj\MySqlSchema\Columns\Numeric\Integers\SmallIntColumn|\donatj\MySqlSchema\Columns\Numeric\Integers\TinyIntColumn|null
 	 */
-	public function make( $colType, $colName ) {
-		switch( $colType ) {
-			case 'bool':
-				$col = new TinyIntColumn($colName);
-				$col->setLength(1);
+	public function make( string $colType, string $colName ) : AbstractColumn {
 
-				return $col;
-			case 'tinyint':
-				return new TinyIntColumn($colName);
-			case 'smallint':
-				return new SmallIntColumn($colName);
-			case 'int':
-				return new IntColumn($colName);
-			case 'mediumint':
-				return new MediumIntColumn($colName);
-			case 'bigint':
-				return new BigIntColumn($colName);
+		$makeBool = function( string $colName ) : TinyIntColumn {
+			$col = new TinyIntColumn($colName);
+			$col->setLength(1);
 
-			case 'tinytext':
-				return new TinyTextColumn($colName);
-			case 'text':
-				return new TextColumn($colName);
-			case 'mediumtext':
-				return new MediumTextColumn($colName);
-			case 'longtext':
-				return new LongTextColumn($colName);
+			return $col;
+		};
 
-			case 'char':
-				return new CharColumn($colName, 255);
-			case 'varchar':
-				return new VarcharColumn($colName, 255); //will get overriten further down
-
-			case 'timestamp':
-				return new TimestampColumn($colName, 255);
-			case 'year':
-				return new YearColumn($colName, 4);
-			case 'datetime':
-				return new DateTimeColumn($colName);
-		}
-
-		throw new StructureException('unknown type: ' . $colType);
+		return match ($colType) {
+			'bool'       => $makeBool($colName),
+			'tinyint'    => new TinyIntColumn($colName),
+			'smallint'   => new SmallIntColumn($colName),
+			'int'        => new IntColumn($colName),
+			'mediumint'  => new MediumIntColumn($colName),
+			'bigint'     => new BigIntColumn($colName),
+			'tinytext'   => new TinyTextColumn($colName),
+			'text'       => new TextColumn($colName),
+			'mediumtext' => new MediumTextColumn($colName),
+			'longtext'   => new LongTextColumn($colName),
+			'char'       => new CharColumn($colName, 255),
+			'varchar'    => new VarcharColumn($colName, 255),
+			'timestamp'  => new TimestampColumn($colName, 255),
+			'year'       => new YearColumn($colName, 4),
+			'datetime'   => new DateTimeColumn($colName),
+			default      => throw new StructureException('unknown type: ' . $colType),
+		};
 	}
 
 }

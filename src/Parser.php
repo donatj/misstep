@@ -29,12 +29,13 @@ class Parser {
 
 	public function __construct(
 		protected readonly ColumnFactory $columnFactory,
-	) {}
+	) {
+	}
 
 	/**
-	 * @throws \donatj\Misstep\Exceptions\StructureException
-	 * @throws \donatj\Misstep\Exceptions\ParseException
 	 * @return \donatj\Misstep\ParseTable[]
+	 * @throws \donatj\Misstep\Exceptions\ParseException
+	 * @throws \donatj\Misstep\Exceptions\StructureException
 	 */
 	public function parse( string $jql ) : array {
 		$jql = preg_replace('%^//.*$%mx', '', $jql); // remove commented lines before parse
@@ -76,7 +77,7 @@ class Parser {
 
 				// replace * with table name
 				$colName = preg_replace_callback('/\\\\?\*/', function( $matches ) use ( $table ) {
-					if(str_starts_with($matches[0], '\\')) {
+					if( str_starts_with($matches[0], '\\') ) {
 						return '*';
 					}
 
@@ -88,7 +89,7 @@ class Parser {
 				if(
 					$bodyResult[$j]['colLength']
 					&& ($col instanceof RequiredLengthInterface
-					 || $col instanceof OptionalLengthInterface)
+						|| $col instanceof OptionalLengthInterface)
 				) {
 					$col->setLength($bodyResult[$j]['colLength']);
 				}
@@ -128,14 +129,14 @@ class Parser {
 					}
 				}
 
-				if( trim($bodyResult[$j]['keys']) != '' ) {
+				if( trim($bodyResult[$j]['keys']) !== '' ) {
 					$keys = array_filter(explode(' ', $bodyResult[$j]['keys']));
 					foreach( $keys as $key ) {
 						$tableKeys['NORMAL'][$key][] = $col;
 					}
 				}
 
-				if( trim($bodyResult[$j]['uniques']) != '' ) {
+				if( trim($bodyResult[$j]['uniques']) !== '' ) {
 					$keys = array_filter(explode(' ', $bodyResult[$j]['uniques']));
 					foreach( $keys as $key ) {
 						$tableKeys['UNIQUE'][$key][] = $col;
@@ -201,23 +202,37 @@ class Parser {
 	}
 
 	/**
+	 * @param array{children:array<string,AbstractColumn[]>,parents:array<string,AbstractColumn>} $foreignKeys
 	 * @throws \donatj\Misstep\Exceptions\StructureException
 	 */
 	private function linkForeignKeys( array $foreignKeys ) : void {
 		foreach( $foreignKeys['children'] as $name => $fks ) {
-			if( !isset($foreignKeys['parents'][$name]) ) {
+			$remote = $foreignKeys['parents'][$name] ?? null;
+			if( $remote === null ) {
 				throw new StructureException("unknown foreign key: {$name}");
 			}
 
-			$remote = $foreignKeys['parents'][$name];
-
-			/**
-			 * @var AbstractColumn $local
-			 * @var ParseTable $tbl
-			 */
 			foreach( $fks as $local ) {
 				$fkTables = $local->getTables();
 				$tbl      = current($fkTables);
+
+				if( $local->getTypeName() !== $remote->getTypeName() ) {
+					throw new StructureException("{$local->getName()} type does not match defined foreign key type");
+				}
+
+				if( $local instanceof SignedInterface && $remote instanceof SignedInterface ) {
+					if( $local->isSigned() !== $remote->isSigned() ) {
+						throw new StructureException("{$local->getName()} signedness does not match defined foreign key signedness");
+					}
+				}
+
+				if( ($local instanceof OptionalLengthInterface && $remote instanceof OptionalLengthInterface) ||
+					($local instanceof RequiredLengthInterface && $remote instanceof RequiredLengthInterface)
+				) {
+					if( $local->getLength() !== $remote->getLength() ) {
+						throw new StructureException("{$local->getName()} length does not match defined foreign key length");
+					}
+				}
 
 				$tbl->addForeignKey($local, $remote);
 			}

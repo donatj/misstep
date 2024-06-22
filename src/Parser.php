@@ -25,8 +25,8 @@ class Parser {
 		[ \t]+(?P<nullable>\*)?(?P<signed>-)?(?P<colType>[a-z]+)(?P<colLength>\d+)?(?P<colDecimal>,\d+)?
 		(?:(?P<hasDefault>=)(?:\'(?P<default1>(?:\'\'|[^\'])*)\'|(?P<default2>\S+)))?
 		(?P<pk>[ \t]+\*?pk)?
-		(?P<keys>(?:[ \t]+k\d+)*)
-		(?P<uniques>(?:[ \t]+u\d+)*)
+		(?P<keys>(?:[ \t]+k\d+(?::\d+)?)*)
+		(?P<uniques>(?:[ \t]+u\d+(?::\d+)?)*)
 		(?P<comment>\n(?::[ \t].*\n?)*)/x';
 
 	public function __construct(
@@ -79,6 +79,7 @@ class Parser {
 			if( trim($result[$i]['comment']) ) {
 				$table->setComment($this->parseComment($result[$i]['comment']));
 			}
+
 
 			$tableKeys = [];
 
@@ -158,16 +159,28 @@ class Parser {
 				}
 
 				if( trim($bodyResult[$j]['keys']) !== '' ) {
-					$keys = array_filter(explode(' ', $bodyResult[$j]['keys']));
+					$splitKeys = preg_split('/[ \t]+/', trim($bodyResult[$j]['keys']));
+					if( $splitKeys === false ) {
+						throw new RuntimeException('failed to split keys');
+					}
+
+					$keys = array_filter($splitKeys);
 					foreach( $keys as $key ) {
-						$tableKeys['NORMAL'][$key][] = $col;
+						$keyParts                            = explode(':', $key, 2);
+						$tableKeys['NORMAL'][$keyParts[0]][] = [ $col, (int)($keyParts[1] ?? -1000) ];
 					}
 				}
 
 				if( trim($bodyResult[$j]['uniques']) !== '' ) {
-					$keys = array_filter(explode(' ', $bodyResult[$j]['uniques']));
+					$splitKeys = preg_split('/[ \t]+/', trim($bodyResult[$j]['uniques']));
+					if( $splitKeys === false ) {
+						throw new RuntimeException('failed to split unique keys');
+					}
+
+					$keys = array_filter($splitKeys);
 					foreach( $keys as $key ) {
-						$tableKeys['UNIQUE'][$key][] = $col;
+						$keyParts                            = explode(':', $key, 2);
+						$tableKeys['UNIQUE'][$keyParts[0]][] = [ $col, (int)($keyParts[1] ?? -1000) ];
 					}
 				}
 
@@ -184,21 +197,27 @@ class Parser {
 
 			foreach( $tableKeys as $type => $tKeys ) {
 				foreach( $tKeys as $tk => $tcols ) {
-					$keyName = array_reduce($tcols, function( $carry, AbstractColumn $item ) use ( $type ) {
-						return ($carry ? $carry . '_and_' : ($type == 'UNIQUE' ? 'unq_' : 'idx_')) . $item->getName();
+					usort($tcols, function( array $a, array $b ) : int {
+						return $a[1] <=> $b[1];
+					});
+
+					$prefix = $type === 'UNIQUE' ? 'unq_' : 'idx_';
+
+					$keyName = array_reduce(array_column($tcols, 0), function( string $carry, AbstractColumn $item ) use ( $prefix ) {
+						return ($carry ? $carry . '_and_' : $prefix) . $item->getName();
 					}, '');
 					$keyName .= '_' . $tk;
 
 					if( strlen($keyName) > 64 ) {
-						$keyName = array_reduce($tcols, function( $carry, AbstractColumn $item ) use ( $type ) {
+						$keyName = array_reduce(array_column($tcols, 0), function( string $carry, AbstractColumn $item ) use ( $prefix ) {
 							$name = $this->getShortColumnNameAcronym($item->getName());
 
-							return ($carry ? $carry . '_and_' : ($type == 'UNIQUE' ? 'unq_' : 'idx_')) . $name;
+							return ($carry ? $carry . '_and_' : $prefix) . $name;
 						}, '');
 					}
 
 					foreach( $tcols as $tcol ) {
-						$table->addKeyColumn($keyName, $tcol, null, $type);
+						$table->addKeyColumn($keyName, $tcol[0], null, $type);
 					}
 				}
 			}

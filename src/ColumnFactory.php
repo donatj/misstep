@@ -4,6 +4,7 @@ namespace donatj\Misstep;
 
 use donatj\Misstep\Exceptions\StructureException;
 use donatj\MySqlSchema\Columns\AbstractColumn;
+use donatj\MySqlSchema\Columns\Json\JsonColumn;
 use donatj\MySqlSchema\Columns\Numeric\Integers\BigIntColumn;
 use donatj\MySqlSchema\Columns\Numeric\Integers\IntColumn;
 use donatj\MySqlSchema\Columns\Numeric\Integers\MediumIntColumn;
@@ -24,7 +25,7 @@ class ColumnFactory {
 	/**
 	 * @throws \donatj\Misstep\Exceptions\StructureException
 	 */
-	public function make( string $colType, string $colName ) : DateTimeColumn|TinyTextColumn|SmallIntColumn|IntColumn|CharColumn|MediumIntColumn|TimestampColumn|MediumTextColumn|YearColumn|LongTextColumn|TinyIntColumn|BigIntColumn|VarcharColumn|TextColumn {
+	public function make( string $colType, string $colName ) : DateTimeColumn|TinyTextColumn|SmallIntColumn|IntColumn|CharColumn|MediumIntColumn|TimestampColumn|MediumTextColumn|YearColumn|LongTextColumn|TinyIntColumn|BigIntColumn|VarcharColumn|TextColumn|JsonColumn {
 
 		$makeBool = function( string $colName ) : TinyIntColumn {
 			$col = new TinyIntColumn($colName);
@@ -49,6 +50,7 @@ class ColumnFactory {
 			'timestamp'  => new TimestampColumn($colName),
 			'year'       => new YearColumn($colName, 4),
 			'datetime'   => new DateTimeColumn($colName),
+			'json'       => new JsonColumn($colName),
 			default      => throw new StructureException('unknown type: ' . $colType),
 		};
 	}

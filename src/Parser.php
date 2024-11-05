@@ -97,7 +97,7 @@ class Parser {
 				}
 
 				// replace * with table name
-				$colName = preg_replace_callback('/\\\\?\*/', function( $matches ) use ( $table ) {
+				$colName = preg_replace_callback('/\\\\?\*/', function ( $matches ) use ( $table ) {
 					if( str_starts_with($matches[0], '\\') ) {
 						return '*';
 					}
@@ -196,19 +196,19 @@ class Parser {
 
 			foreach( $tableKeys as $type => $tKeys ) {
 				foreach( $tKeys as $tk => $tcols ) {
-					usort($tcols, function( array $a, array $b ) : int {
+					usort($tcols, function ( array $a, array $b ) : int {
 						return $a[1] <=> $b[1];
 					});
 
 					$prefix = $type === 'UNIQUE' ? 'unq_' : 'idx_';
 
-					$keyName = array_reduce(array_column($tcols, 0), function( string $carry, AbstractColumn $item ) use ( $prefix ) {
+					$keyName = array_reduce(array_column($tcols, 0), function ( string $carry, AbstractColumn $item ) use ( $prefix ) {
 						return ($carry ? $carry . '_and_' : $prefix) . $item->getName();
 					}, '');
 					$keyName .= '_' . $tk;
 
 					if( strlen($keyName) > 64 ) {
-						$keyName = array_reduce(array_column($tcols, 0), function( string $carry, AbstractColumn $item ) use ( $prefix ) {
+						$keyName = array_reduce(array_column($tcols, 0), function ( string $carry, AbstractColumn $item ) use ( $prefix ) {
 							$name = $this->getShortColumnNameAcronym($item->getName());
 
 							return ($carry ? $carry . '_and_' : $prefix) . $name;
@@ -298,7 +298,7 @@ class Parser {
 	private function getShortColumnNameAcronym( string $columnName ) : string {
 		$parts = explode('_', $columnName);
 
-		return implode(array_map(function( $part ) { return $part[0]; }, $parts));
+		return implode(array_map(function ( $part ) { return $part[0]; }, $parts));
 	}
 
 }

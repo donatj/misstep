@@ -29,7 +29,7 @@ class ColumnFactory {
 		string $colName,
 	) : DateTimeColumn|TinyTextColumn|SmallIntColumn|IntColumn|CharColumn|MediumIntColumn|TimestampColumn|MediumTextColumn|YearColumn|LongTextColumn|TinyIntColumn|BigIntColumn|VarcharColumn|TextColumn|JsonColumn {
 
-		$makeBool = function( string $colName ) : TinyIntColumn {
+		$makeBool = function ( string $colName ) : TinyIntColumn {
 			$col = new TinyIntColumn($colName);
 			$col->setLength(1);
 

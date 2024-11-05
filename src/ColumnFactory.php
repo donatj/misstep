@@ -3,7 +3,6 @@
 namespace donatj\Misstep;
 
 use donatj\Misstep\Exceptions\StructureException;
-use donatj\MySqlSchema\Columns\AbstractColumn;
 use donatj\MySqlSchema\Columns\Json\JsonColumn;
 use donatj\MySqlSchema\Columns\Numeric\Integers\BigIntColumn;
 use donatj\MySqlSchema\Columns\Numeric\Integers\IntColumn;
@@ -25,7 +24,10 @@ class ColumnFactory {
 	/**
 	 * @throws \donatj\Misstep\Exceptions\StructureException
 	 */
-	public function make( string $colType, string $colName ) : DateTimeColumn|TinyTextColumn|SmallIntColumn|IntColumn|CharColumn|MediumIntColumn|TimestampColumn|MediumTextColumn|YearColumn|LongTextColumn|TinyIntColumn|BigIntColumn|VarcharColumn|TextColumn|JsonColumn {
+	public function make(
+		string $colType,
+		string $colName,
+	) : DateTimeColumn|TinyTextColumn|SmallIntColumn|IntColumn|CharColumn|MediumIntColumn|TimestampColumn|MediumTextColumn|YearColumn|LongTextColumn|TinyIntColumn|BigIntColumn|VarcharColumn|TextColumn|JsonColumn {
 
 		$makeBool = function( string $colName ) : TinyIntColumn {
 			$col = new TinyIntColumn($colName);

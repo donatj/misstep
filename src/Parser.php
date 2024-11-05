@@ -35,9 +35,9 @@ class Parser {
 	}
 
 	/**
-	 * @return array<string,\donatj\Misstep\ParseTable>
 	 * @throws \donatj\Misstep\Exceptions\ParseException
 	 * @throws \donatj\Misstep\Exceptions\StructureException
+	 * @return array<string,\donatj\Misstep\ParseTable>
 	 */
 	public function parse( string $jql ) : array {
 		$jql = preg_replace('%^//.*$%mx', '', $jql); // remove commented lines before parse
@@ -49,12 +49,12 @@ class Parser {
 		if( $jql === null ) {
 			throw new RuntimeException('failed while removing trailing whitespace');
 		}
+
 		$jql .= "\n";
 
 		$this->checkForParseErrors(self::TABLESET_MATCH, $jql);
 
 		preg_match_all(self::TABLESET_MATCH, $jql, $result, PREG_SET_ORDER);
-
 
 		/**
 		 * @var array{children:array<string,AbstractColumn[]>,parents:array<string,AbstractColumn>} $foreignKeys
@@ -79,7 +79,6 @@ class Parser {
 			if( trim($result[$i]['comment']) ) {
 				$table->setComment($this->parseComment($result[$i]['comment']));
 			}
-
 
 			$tableKeys = [];
 
@@ -280,8 +279,8 @@ class Parser {
 					}
 				}
 
-				if( ($local instanceof OptionalLengthInterface && $remote instanceof OptionalLengthInterface) ||
-					($local instanceof RequiredLengthInterface && $remote instanceof RequiredLengthInterface)
+				if( ($local instanceof OptionalLengthInterface && $remote instanceof OptionalLengthInterface)
+					|| ($local instanceof RequiredLengthInterface && $remote instanceof RequiredLengthInterface)
 				) {
 					if( $local->getLength() !== $remote->getLength() ) {
 						throw new StructureException("{$local->getName()} length does not match defined foreign key length");

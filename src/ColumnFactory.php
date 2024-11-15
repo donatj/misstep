@@ -3,7 +3,9 @@
 namespace donatj\Misstep;
 
 use donatj\Misstep\Exceptions\StructureException;
+use donatj\MySqlSchema\Columns\AbstractColumn;
 use donatj\MySqlSchema\Columns\Json\JsonColumn;
+use donatj\MySqlSchema\Columns\Numeric\FixedPoint\DecimalColumn;
 use donatj\MySqlSchema\Columns\Numeric\Integers\BigIntColumn;
 use donatj\MySqlSchema\Columns\Numeric\Integers\IntColumn;
 use donatj\MySqlSchema\Columns\Numeric\Integers\MediumIntColumn;
@@ -27,7 +29,7 @@ class ColumnFactory {
 	public function make(
 		string $colType,
 		string $colName,
-	) : DateTimeColumn|TinyTextColumn|SmallIntColumn|IntColumn|CharColumn|MediumIntColumn|TimestampColumn|MediumTextColumn|YearColumn|LongTextColumn|TinyIntColumn|BigIntColumn|VarcharColumn|TextColumn|JsonColumn {
+	) : AbstractColumn {
 
 		$makeBool = function ( string $colName ) : TinyIntColumn {
 			$col = new TinyIntColumn($colName);
@@ -44,6 +46,7 @@ class ColumnFactory {
 			'mediumint'  => new MediumIntColumn($colName),
 			'bigint'     => new BigIntColumn($colName),
 			'tinytext'   => new TinyTextColumn($colName),
+			'decimal'    => new DecimalColumn($colName, 10, 0), // 10,0 is the default - it's weird
 			'text'       => new TextColumn($colName),
 			'mediumtext' => new MediumTextColumn($colName),
 			'longtext'   => new LongTextColumn($colName),

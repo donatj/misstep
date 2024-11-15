@@ -6,10 +6,14 @@ use donatj\Misstep\Exceptions\ParseException;
 use donatj\Misstep\Exceptions\RuntimeException;
 use donatj\Misstep\Exceptions\StructureException;
 use donatj\MySqlSchema\Columns\AbstractColumn;
+use donatj\MySqlSchema\Columns\Interfaces\DecimalPlacesInterface;
+use donatj\MySqlSchema\Columns\Interfaces\MaxDigitsInterface;
 use donatj\MySqlSchema\Columns\Interfaces\OptionalLengthInterface;
+use donatj\MySqlSchema\Columns\Interfaces\PrecisionInterface;
 use donatj\MySqlSchema\Columns\Interfaces\RequiredLengthInterface;
 use donatj\MySqlSchema\Columns\Interfaces\SignedInterface;
 use donatj\MySqlSchema\Columns\Numeric\AbstractIntegerColumn;
+use donatj\MySqlSchema\Columns\Numeric\FixedPoint\DecimalColumn;
 
 class Parser {
 
@@ -22,7 +26,7 @@ class Parser {
 
 	private const COLUMN_MATCH = '/(?P<signal>[-?!])
 		[ \t]+(?:(?P<ref>\S*):)?(?P<colName>\S+)
-		[ \t]+(?P<nullable>\*)?(?P<signed>-)?(?P<colType>[a-z]+)(?P<colLength>\d+)?(?P<colDecimal>,\d+)?
+		[ \t]+(?P<nullable>\*)?(?P<signed>-)?(?P<colType>[a-z]+)(?P<colLength>\d+)?(?:,(?P<colDecimal>\d+))?
 		(?:(?P<hasDefault>=)(?:\'(?P<default1>(?:\'\'|[^\'])*)\'|(?P<default2>\S+)))?
 		(?P<pk>[ \t]+\*?pk)?
 		(?P<keys>(?:[ \t]+k\d+(?::\d+)?)*)
@@ -70,9 +74,7 @@ class Parser {
 			$body = $result[$i]['body'] . "\n";
 
 			$table = new ParseTable($result[$i]['declaration']);
-			// @phpstan-ignore argument.type
 			$table->setCharset('utf8');
-			// @phpstan-ignore argument.type
 			$table->setCollation('utf8_general_ci');
 			$table->setIsPseudo($result[$i]['type'] === '@');
 
@@ -113,14 +115,28 @@ class Parser {
 
 				$col = $this->columnFactory->make($colType, $colName);
 
-				$colLength = intval($bodyResult[$j]['colLength']);
-				if(
-					$colLength > 0
-					&& ($col instanceof RequiredLengthInterface
-						|| $col instanceof OptionalLengthInterface)
-				) {
-					$col->setLength($colLength);
+
+				$colLength  = $bodyResult[$j]['colLength'] === '' ? null : intval($bodyResult[$j]['colLength']);
+				$colDecimal = $bodyResult[$j]['colDecimal'] === '' ? null : intval($bodyResult[$j]['colDecimal']);
+				if ($colLength !== null) {
+					if (
+						$colDecimal !== null &&
+						$col instanceof MaxDigitsInterface &&
+						$col instanceof DecimalPlacesInterface
+					) {
+						$col->setMaxDigits($colLength);
+						$col->setDecimalPlaces($colDecimal);
+					} elseif (
+						$col instanceof RequiredLengthInterface ||
+						$col instanceof OptionalLengthInterface
+					) {
+						$col->setLength($colLength);
+					} elseif ($col instanceof PrecisionInterface) {
+						$col->setPrecision($colLength);
+					}
 				}
+
+
 
 				if( $bodyResult[$j]['signed'] ) {
 					if( $col instanceof SignedInterface ) {

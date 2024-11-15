@@ -6,7 +6,7 @@
 	],
 	"require": {
 		"donatj/flags" : "1.*",
-		"donatj/mysql-schema" : "^0.2.0",
+		"donatj/mysql-schema" : "^0.3.0",
 		"php": ">=8.1"
 	},
 	"require-dev": {

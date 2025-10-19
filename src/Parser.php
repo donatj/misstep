@@ -13,7 +13,6 @@ use donatj\MySqlSchema\Columns\Interfaces\PrecisionInterface;
 use donatj\MySqlSchema\Columns\Interfaces\RequiredLengthInterface;
 use donatj\MySqlSchema\Columns\Interfaces\SignedInterface;
 use donatj\MySqlSchema\Columns\Numeric\AbstractIntegerColumn;
-use donatj\MySqlSchema\Columns\Numeric\FixedPoint\DecimalColumn;
 
 class Parser {
 
@@ -115,28 +114,25 @@ class Parser {
 
 				$col = $this->columnFactory->make($colType, $colName);
 
-
 				$colLength  = $bodyResult[$j]['colLength'] === '' ? null : intval($bodyResult[$j]['colLength']);
 				$colDecimal = $bodyResult[$j]['colDecimal'] === '' ? null : intval($bodyResult[$j]['colDecimal']);
 				if ($colLength !== null) {
 					if (
-						$colDecimal !== null &&
-						$col instanceof MaxDigitsInterface &&
-						$col instanceof DecimalPlacesInterface
+						$colDecimal !== null
+						&& $col instanceof MaxDigitsInterface
+						&& $col instanceof DecimalPlacesInterface
 					) {
 						$col->setMaxDigits($colLength);
 						$col->setDecimalPlaces($colDecimal);
 					} elseif (
-						$col instanceof RequiredLengthInterface ||
-						$col instanceof OptionalLengthInterface
+						$col instanceof RequiredLengthInterface
+						|| $col instanceof OptionalLengthInterface
 					) {
 						$col->setLength($colLength);
 					} elseif ($col instanceof PrecisionInterface) {
 						$col->setPrecision($colLength);
 					}
 				}
-
-
 
 				if( $bodyResult[$j]['signed'] ) {
 					if( $col instanceof SignedInterface ) {

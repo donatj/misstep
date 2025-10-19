@@ -1,0 +1,30 @@
+# table_with_big_index
+: test the index shortener
+- *_column_a int k1 u1
+- *_column_b int k1 u1
+- *_column_c int k1 u1
+- *_column_d int k1 u1
+
+# table_with_extra_big_index
+: test the ultralong index shortener
+- *_column_a int k1 u1
+- *_column_b int k1 u1
+- *_column_c int k1 u1
+- *_column_d int k1 u1
+- *_column_e int k1 u1
+- *_column_f int k1 u1
+- *_column_g int k1 u1
+- *_column_h int k1 u1
+- *_column_i int k1 u1
+- *_column_j int k1 u1
+- *_column_k int k1 u1
+- *_column_l int k1 u1
+- *_column_m int k1 u1
+- *_column_n int k1 u1
+- *_column_o int k1 u1
+
+# table_with_ordered_indexes
+: test index ordering
+- a int k1:3 k2:2 u1:2
+- b int k1:2      u1:3
+- c int k1:1 k2:1 u1:1

@@ -1,0 +1,35 @@
+@ initiatives
+! initiative_id int10 *pk
+
+# initiative_task_activity
+: Represents a task activity
+! *_id int10 *pk
+? initiative_id int10  k1
+- title varchar255
+- descr text
+- atos *decimal3,1
+- deleted bool      k1
+- sort_order int10
+
+# initiative_task_activity_completion
+: Marks the completion an activity by a user
+! *_id int10 *pk
+? initiative_task_activity_id int10 u1
+- path varchar300
+: path to recording in S3 from the base prefix
+? initiative_task_activity_result_id *int10 u2
+: id of selected (most recent) result set
+- duration smallint11
+- user_id int11 k2 u1
+- completed timestamp
+
+# initiative_task_activity_results
+: JSON payloads as received from the activity API
+! initiative_task_activity_result_id int10 *pk
+- is_error bool
+: Was the response an error?
+- fluency_payload json
+- received timestamp
+: time the payload was received
+? initiative_task_activity_completion_id int10
+: the activity task this belongs to

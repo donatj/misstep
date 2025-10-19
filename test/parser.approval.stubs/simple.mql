@@ -1,0 +1,11 @@
+@ users
+! u:user_id int pk
+
+# user_article_block
+: Existence of a record indicates a user is forbidden from reading a given article
+! user_article_block int *pk
+? u:user_id int           u1
+- article_id mediumint k1 u1
+- user_id_blocking *int k2
+: The user who set the block. Nullable to make large scripted inserts easier.
+- modified timestamp

@@ -9,7 +9,7 @@ CREATE TABLE `initiative_task_activity` (
 	PRIMARY KEY (`initiative_task_activity_id`),
 	KEY `idx_initiative_id_and_deleted_k1` (`initiative_id`,`deleted`),
 	FOREIGN KEY (`initiative_id`) REFERENCES `initiatives`(`initiative_id`)
-) CHARACTER SET utf8 COLLATE utf8_general_ci COMMENT 'Represents a task activity';
+) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci COMMENT 'Represents a task activity';
 
 CREATE TABLE `initiative_task_activity_completion` (
 	`initiative_task_activity_completion_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -25,7 +25,7 @@ CREATE TABLE `initiative_task_activity_completion` (
 	KEY `idx_user_id_k2` (`user_id`),
 	FOREIGN KEY (`initiative_task_activity_id`) REFERENCES `initiative_task_activity`(`initiative_task_activity_id`),
 	FOREIGN KEY (`initiative_task_activity_result_id`) REFERENCES `initiative_task_activity_results`(`initiative_task_activity_result_id`)
-) CHARACTER SET utf8 COLLATE utf8_general_ci COMMENT 'Marks the completion an activity by a user';
+) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci COMMENT 'Marks the completion an activity by a user';
 
 CREATE TABLE `initiative_task_activity_results` (
 	`initiative_task_activity_result_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -35,4 +35,4 @@ CREATE TABLE `initiative_task_activity_results` (
 	`initiative_task_activity_completion_id` int(10) unsigned NOT NULL COMMENT 'the activity task this belongs to',
 	PRIMARY KEY (`initiative_task_activity_result_id`),
 	FOREIGN KEY (`initiative_task_activity_completion_id`) REFERENCES `initiative_task_activity_completion`(`initiative_task_activity_completion_id`)
-) CHARACTER SET utf8 COLLATE utf8_general_ci COMMENT 'JSON payloads as received from the activity API';
+) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci COMMENT 'JSON payloads as received from the activity API';

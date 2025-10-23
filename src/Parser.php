@@ -73,8 +73,11 @@ class Parser {
 			$body = $result[$i]['body'] . "\n";
 
 			$table = new ParseTable($result[$i]['declaration']);
-			$table->setCharset('utf8');
-			$table->setCollation('utf8_general_ci');
+
+			// @todo make charset/collation configurable
+			$table->setCharset('utf8mb3');
+			$table->setCollation('utf8mb3_general_ci');
+
 			$table->setIsPseudo($result[$i]['type'] === '@');
 
 			if( trim($result[$i]['comment']) ) {

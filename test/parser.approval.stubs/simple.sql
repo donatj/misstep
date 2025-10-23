@@ -9,4 +9,4 @@ CREATE TABLE `user_article_block` (
 	KEY `idx_article_id_k1` (`article_id`),
 	KEY `idx_user_id_blocking_k2` (`user_id_blocking`),
 	FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
-) CHARACTER SET utf8 COLLATE utf8_general_ci COMMENT 'Existence of a record indicates a user is forbidden from reading a given article';
+) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci COMMENT 'Existence of a record indicates a user is forbidden from reading a given article';

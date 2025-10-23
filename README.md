@@ -1,6 +1,7 @@
 # misstep
 
 [![CI](https://github.com/donatj/misstep/actions/workflows/ci.yml/badge.svg)](https://github.com/donatj/misstep/actions/workflows/ci.yml)
+[![Coverage Status](https://coveralls.io/repos/github/donatj/misstep/badge.svg?branch=master)](https://coveralls.io/github/donatj/misstep?branch=master)
 
 Simple Plain Text MySQL Modeling Language - "Like Sass for SQL Modeling"
 

@@ -64,7 +64,7 @@ class Parser {
 		 */
 		$foreignKeys = [ 'parents' => [], 'children' => [] ];
 		/**
-		 * @var ParseTable[] $tables
+		 * @var array<string,\donatj\Misstep\ParseTable> $tables
 		 */
 		$tables = [];
 

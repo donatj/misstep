@@ -1,6 +1,5 @@
 parameters:
-	level: 9
+	level: 10
 	paths:
 		- src
 		- composer/bin/misstep
-	phpVersion: 80100

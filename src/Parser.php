@@ -212,20 +212,7 @@ class Parser {
 						return $a[1] <=> $b[1];
 					});
 
-					$prefix = $type === 'UNIQUE' ? 'unq_' : 'idx_';
-
-					$keyName = array_reduce(array_column($tcols, 0), function ( string $carry, AbstractColumn $item ) use ( $prefix ) {
-						return ($carry ? $carry . '_and_' : $prefix) . $item->getName();
-					}, '');
-					$keyName .= '_' . $tk;
-
-					if( strlen($keyName) > 64 ) {
-						$keyName = array_reduce(array_column($tcols, 0), function ( string $carry, AbstractColumn $item ) use ( $prefix ) {
-							$name = $this->getShortColumnNameAcronym($item->getName());
-
-							return ($carry ? $carry . '_and_' : $prefix) . $name;
-						}, '');
-					}
+					$keyName = $this->generateKeyName($type, $tcols, $tk);
 
 					foreach( $tcols as $tcol ) {
 						$table->addKeyColumn($keyName, $tcol[0], null, $type);
@@ -311,6 +298,61 @@ class Parser {
 		$parts = explode('_', $columnName);
 
 		return implode(array_map(function ( $part ) { return $part[0]; }, $parts));
+	}
+
+	/**
+	 * @param "NORMAL"|"UNIQUE"               $type
+	 * @param list<array{AbstractColumn,int}> $tcols
+	 */
+	private function generateKeyName( string $type, array $tcols, string $tk ) : string {
+		$prefix = $type === 'UNIQUE' ? 'unq_' : 'idx_';
+
+		$keyName = array_reduce(array_column($tcols, 0), function ( string $carry, AbstractColumn $item ) use ( $prefix ) {
+			return ($carry ? $carry . '_and_' : $prefix) . $item->getName();
+		}, '');
+		$keyName .= '_' . $tk;
+
+		if( strlen($keyName) > 64 ) {
+			$keyName = array_reduce(array_column($tcols, 0), function ( string $carry, AbstractColumn $item ) use ( $prefix ) {
+				$name = $this->getShortColumnNameAcronym($item->getName());
+
+				return ($carry ? $carry . '_and_' : $prefix) . $name;
+			}, '');
+		}
+
+		return $this->stablePseudorandomStringShortener($keyName, 64);
+	}
+
+	/**
+	 * This function generates a stable pseudorandom substring of the given length from the input string.
+	 */
+	private function stablePseudorandomStringShortener(string $s, int $length) : string {
+		$n = strlen($s);
+		if ($n <= $length) {
+			return $s;
+		}
+
+		$scores = [];
+		for ($i = 0; $i < $n; $i++) {
+			$h = hash('sha256', $s . ':' . $i, true);
+			$scoreArray = unpack('N', substr($h, 0, 4));
+			if( $scoreArray === false ) {
+				throw new RuntimeException('failed to unpack hash while generating stable pseudorandom string');
+			}
+
+			$scores[] = [$i, $scoreArray[1]];
+		}
+
+		usort($scores, fn ($a, $b) => ($a[1] <=> $b[1]) ?: ($a[0] <=> $b[0]));
+		$keep = array_slice(array_column($scores, 0), 0, $length);
+		sort($keep, SORT_NUMERIC);
+
+		$out = '';
+		foreach ($keep as $i) {
+			$out .= $s[$i];
+		}
+
+		return $out;
 	}
 
 }

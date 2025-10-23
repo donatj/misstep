@@ -33,3 +33,4 @@ jobs:
           ./vendor/bin/phpcbf
           ./vendor/bin/php-cs-fixer fix --dry-run --diff
           ./vendor/bin/phpstan analyse
+          ./vendor/bin/phpunit

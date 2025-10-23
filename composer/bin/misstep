@@ -21,6 +21,7 @@ foreach( $files as $file ) {
 $flags        = new donatj\Flags;
 $drop         =& $flags->bool('drop', false, 'Include DROP TABLE?');
 $inputComment =& $flags->bool('input-comment', false, 'Include original input as a comment?');
+$foreignKeys  =& $flags->bool('disable-foreign-key-checks', true, 'Disable foreign key checks in output?');
 
 $columnFactory = new ColumnFactory;
 
@@ -57,6 +58,7 @@ try {
 		$jql,
 		$inputComment, // @phpstan-ignore argument.type
 		$drop, // @phpstan-ignore argument.type
+		$foreignKeys, // @phpstan-ignore argument.type
 	);
 
 	$tables = $parser->parse($jql);

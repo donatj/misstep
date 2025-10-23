@@ -30,7 +30,7 @@ return (new PhpCsFixer\Config)
 				'spacing' => 'one',
 			],
 
-			'visibility_required' => [
+			'modifier_keywords' => [
 				'elements' => [ 'property', 'method' ],
 			],
 			'indentation_type'    => true,

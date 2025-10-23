@@ -8,6 +8,7 @@ class Renderer {
 		protected string $input,
 		protected bool $inputComment,
 		protected bool $dropTables,
+		protected bool $disableForeignKeyChecks = true,
 	) {
 	}
 
@@ -18,10 +19,13 @@ class Renderer {
 		$output = '';
 		if( $this->inputComment ) {
 			$outputJql = rtrim($this->input);
-			$output    .= "/*\n{$outputJql}\n*/\n\n";
+			$output    .= "/** [misstep-v1] \n{$outputJql}\n[eof-misstep] **/\n\n";
 		}
 
-		$output .= "SET FOREIGN_KEY_CHECKS = 0;\n\n";
+		if( $this->disableForeignKeyChecks ) {
+			$output .= "SET FOREIGN_KEY_CHECKS = 0;\n\n";
+		}
+
 		foreach( $tables as $table ) {
 			if( !$table->isIsPseudo() ) {
 				if( $this->dropTables ) {
@@ -33,7 +37,11 @@ class Renderer {
 			}
 		}
 
-		return $output . "SET FOREIGN_KEY_CHECKS = 1;\n";
+		if( $this->disableForeignKeyChecks ) {
+			$output .= "SET FOREIGN_KEY_CHECKS = 1;\n";
+		}
+
+		return $output;
 	}
 
 	// @todo make available from mysql-schema

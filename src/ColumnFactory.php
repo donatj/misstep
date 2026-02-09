@@ -49,8 +49,8 @@ class ColumnFactory {
 			'bigint'     => new BigIntColumn($colName),
 			'float'      => new FloatColumn($colName, 10),
 			'double'     => new DoubleColumn($colName, 10),
-			'tinytext'   => new TinyTextColumn($colName),
 			'decimal'    => new DecimalColumn($colName, 10, 0), // 10,0 is the default - it's weird
+			'tinytext'   => new TinyTextColumn($colName),
 			'text'       => new TextColumn($colName),
 			'mediumtext' => new MediumTextColumn($colName),
 			'longtext'   => new LongTextColumn($colName),

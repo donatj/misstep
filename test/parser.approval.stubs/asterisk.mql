@@ -1,0 +1,12 @@
+# test_asterisk
+: Test table with asterisk substitution in column names
+- *_id int *pk
+: Column where * is replaced with table name (test_asterisk_id)
+- user_* int k1
+: Column with * at end (user_test_asterisk)
+- *_middle_* varchar50
+: Column with multiple * (test_asterisk_middle_test_asterisk)
+- \*_literal varchar20
+: Column with escaped asterisk (\* becomes literal *)
+- count_\* int
+: Column with escaped asterisk at end

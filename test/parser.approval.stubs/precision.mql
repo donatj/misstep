@@ -1,0 +1,11 @@
+# test_precision
+: Test table with floating point precision
+- id int *pk
+- price float10
+: Float with precision 10
+- weight double15
+: Double with precision 15
+- score float5
+: Float with precision 5
+- ratio double20
+: Double with precision 20

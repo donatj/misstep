@@ -1,0 +1,23 @@
+# test_types
+: Test table covering all column types
+- id int *pk
+- age tinyint
+: TinyInt for small integers (0-255)
+- quantity smallint
+: SmallInt for medium integers
+- population bigint
+: BigInt for very large integers
+- note tinytext
+: TinyText for short text
+- price decimal10,2
+: Decimal with precision and scale
+- description mediumtext
+: MediumText for longer content
+- content longtext
+: LongText for very long content
+- code char10
+: Char fixed length string
+- birth_year year
+: Year column for years
+- created_at datetime
+: DateTime for timestamps without timezone

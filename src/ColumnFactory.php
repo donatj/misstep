@@ -6,6 +6,8 @@ use donatj\Misstep\Exceptions\StructureException;
 use donatj\MySqlSchema\Columns\AbstractColumn;
 use donatj\MySqlSchema\Columns\Json\JsonColumn;
 use donatj\MySqlSchema\Columns\Numeric\FixedPoint\DecimalColumn;
+use donatj\MySqlSchema\Columns\Numeric\FloatingPoint\DoubleColumn;
+use donatj\MySqlSchema\Columns\Numeric\FloatingPoint\FloatColumn;
 use donatj\MySqlSchema\Columns\Numeric\Integers\BigIntColumn;
 use donatj\MySqlSchema\Columns\Numeric\Integers\IntColumn;
 use donatj\MySqlSchema\Columns\Numeric\Integers\MediumIntColumn;
@@ -45,8 +47,10 @@ class ColumnFactory {
 			'int'        => new IntColumn($colName),
 			'mediumint'  => new MediumIntColumn($colName),
 			'bigint'     => new BigIntColumn($colName),
-			'tinytext'   => new TinyTextColumn($colName),
+			'float'      => new FloatColumn($colName, 10),
+			'double'     => new DoubleColumn($colName, 10),
 			'decimal'    => new DecimalColumn($colName, 10, 0), // 10,0 is the default - it's weird
+			'tinytext'   => new TinyTextColumn($colName),
 			'text'       => new TextColumn($colName),
 			'mediumtext' => new MediumTextColumn($colName),
 			'longtext'   => new LongTextColumn($colName),

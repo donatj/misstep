@@ -1,0 +1,15 @@
+# test_defaults
+: Test table with various default values
+- id int *pk
+- name varchar50='John''s Default'
+: Column with quoted default containing escaped quote
+- status varchar20='active'
+: Column with simple quoted default
+- count int=42
+: Column with unquoted numeric default
+- is_enabled bool=1
+: Column with unquoted boolean default
+- description text='It''s a ''test'' value'
+: Column with multiple escaped quotes
+- code varchar10=NULL
+: Column with unquoted NULL default

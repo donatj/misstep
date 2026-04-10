@@ -291,4 +291,20 @@ MQL;
 		$this->parser->parse($mql);
 	}
 
+	/**
+	 * Tests that only one auto-increment primary key (*pk) can be defined per table
+	 */
+	public function testMultipleAutoIncrementPrimaryKeysThrowsException() : void {
+		$this->expectException(StructureException::class);
+		$this->expectExceptionMessage('table "linking_table" can only have one auto-increment primary key (*pk), "foo_id" already defined, cannot add "bar_id"');
+
+		$mql = <<<'MQL'
+# linking_table
+- foo_id int *pk
+- bar_id int *pk
+MQL;
+
+		$this->parser->parse($mql);
+	}
+
 }

@@ -165,6 +165,18 @@ class Parser {
 				if( trim($bodyResult[$j]['pk']) === "pk" ) {
 					$table->addPrimaryKey($col);
 				} elseif( trim($bodyResult[$j]['pk']) === "*pk" ) {
+					$autoIncrementColumn = $table->getAutoIncrementColumn();
+					if( $autoIncrementColumn !== null ) {
+						throw new StructureException(
+							sprintf(
+								'table "%s" can only have one auto-increment primary key (*pk), "%s" already defined, cannot add "%s"',
+								$table->getName(),
+								$autoIncrementColumn->getName(),
+								$col->getName(),
+							),
+						);
+					}
+
 					if( $col instanceof AbstractIntegerColumn ) {
 						$table->addAutoIncrement($col);
 					} else {

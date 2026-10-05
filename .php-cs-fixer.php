@@ -7,12 +7,18 @@ $finder = PhpCsFixer\Finder::create()
 	->append([ __DIR__ . '/parse.php' ]);
 
 
-return (new PhpCsFixer\Config)
+$config = (new PhpCsFixer\Config)
 	->setUsingCache(true)
 	->setIndent("\t")
 	->setLineEnding("\n")
 	//->setUsingLinter(false)
-	->setRiskyAllowed(true)
+	->setRiskyAllowed(true);
+
+if( method_exists($config, 'setUnsupportedPhpVersionAllowed') ) {
+	$config->setUnsupportedPhpVersionAllowed(true);
+}
+
+return $config
 	->setRules(
 		[
 			'@PHPUnit100Migration:risky' => true,
@@ -192,5 +198,3 @@ return (new PhpCsFixer\Config)
 		]
 	)
 	->setFinder($finder);
-
-

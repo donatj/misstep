@@ -6,17 +6,7 @@ use donatj\Misstep\Exceptions\UserException;
 use donatj\Misstep\Parser;
 use donatj\Misstep\Renderer;
 
-$files = [
-	__DIR__ . '/../../vendor/autoload.php',
-	__DIR__ . '/../../../../autoload.php',
-];
-
-foreach( $files as $file ) {
-	if( file_exists($file) ) {
-		require($file);
-		break;
-	}
-}
+require $_composer_autoload_path ?? __DIR__ . '/../../vendor/autoload.php';
 
 $flags        = new donatj\Flags;
 $drop         =& $flags->bool('drop', false, 'Include DROP TABLE?');
